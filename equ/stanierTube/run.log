@@ -1,0 +1,214 @@
+ 
+  ======================================================================
+  =================     Flux-Tube Equilibrium Solver    ================
+  ======================================================================
+ 
+ 
+  ----------------------------------------------------------------------
+  [ makeJobFile    @initialMod ]
+     * SAVE Directory ::  job/CtrI31_/
+ 
+  [ InitVariables  @initialMod ]
+     * variables are Initialized.
+ 
+  [ setJBRHS       @initialMod ]
+     * Bv0 is set on Boundary
+     * Suggested value of Bv0 :: Bv0 = mu I / 4pi R0 * 0.5d0
+     * Suggested value of Bv0 :: Bv0 = mu I / 4pi R0 * 0.5d0
+                                     =  -0.11957E+01
+ 
+  ----------------------------------------------------------------------
+ 
+ 
+ 
+  [ RZLaplacian  @ myPBiCGSTAB ]
+     * A-Matrix ::        32768 x        32768
+     * Geometry     includes r=0 :: rMin = 0.d0
+  [ PBiCGSTAB    @ myPBICGSTAB ]
+        Iteration  =             1375      /            39322
+        Error      =  0.760832377E-08      /  0.100000000E-07
+ 
+ 
+  ----------------------------------------------------------------------
+  --------------   Flux-Tube Equilibrium Solver - END -    -------------
+  ----------------------------------------------------------------------
+ 
+ 
+  ++++++++++++++++++++++++++++++++++++++++++++++++++
+  ++   Grid System :: B-grid ( Staggered Grid )   ++
+  ++++++++++++++++++++++++++++++++++++++++++++++++++
+ 
+  [ setPrsrRho      @ BgridMod ]
+          Beta               :: beta        ===    0.150000
+          Thermal  Pressure  :: P(Thermal ) ===    0.023093
+          Magnetic Pressure  :: P(Magnetic) ===   11.546676
+          Total Temperature  :: T           ===    0.028800
+                             :: 1 / T       ===   34.722222
+          Density            :: n0          ===    0.801852
+ 
+  ----------------------------------------------------------------------
+  [ WriteField    @ writingMod ]
+ 
+     * SAVE  job/CtrI31_/BgD/Bfd.bin
+     * SAVE  job/CtrI31_/BgD/frp.bin
+     * SAVE  job/CtrI31_/BgD/Jcr.bin
+     * SAVE  job/CtrI31_/BgD/uvc.bin
+     * SAVE  job/CtrI31_/BgD/Bv0.dat
+ 
+  ----------------------------------------------------------------------
+ 
+  [ WriteParam    @ writingMod ]
+     * SAVE  job/CtrI31_/BgD/parameter.dat
+ 
+ 
+  ----------------------------------------------------------------------
+  [ WriteF_MPI    @ writingMod ]
+ 
+     * SAVE  job/CtrI31_/BgD/Bfd_000000.bin
+     * SAVE  job/CtrI31_/BgD/frp_000000.bin
+     * SAVE  job/CtrI31_/BgD/Jcr_000000.bin
+     * SAVE  job/CtrI31_/BgD/uvc_000000.bin
+     * SAVE  job/CtrI31_/BgD/Bfd_000001.bin
+     * SAVE  job/CtrI31_/BgD/frp_000001.bin
+     * SAVE  job/CtrI31_/BgD/Jcr_000001.bin
+     * SAVE  job/CtrI31_/BgD/uvc_000001.bin
+     * SAVE  job/CtrI31_/BgD/Bfd_000002.bin
+     * SAVE  job/CtrI31_/BgD/frp_000002.bin
+     * SAVE  job/CtrI31_/BgD/Jcr_000002.bin
+     * SAVE  job/CtrI31_/BgD/uvc_000002.bin
+     * SAVE  job/CtrI31_/BgD/Bfd_000003.bin
+     * SAVE  job/CtrI31_/BgD/frp_000003.bin
+     * SAVE  job/CtrI31_/BgD/Jcr_000003.bin
+     * SAVE  job/CtrI31_/BgD/uvc_000003.bin
+     * SAVE  job/CtrI31_/BgD/Bfd_000004.bin
+     * SAVE  job/CtrI31_/BgD/frp_000004.bin
+     * SAVE  job/CtrI31_/BgD/Jcr_000004.bin
+     * SAVE  job/CtrI31_/BgD/uvc_000004.bin
+     * SAVE  job/CtrI31_/BgD/Bfd_000005.bin
+     * SAVE  job/CtrI31_/BgD/frp_000005.bin
+     * SAVE  job/CtrI31_/BgD/Jcr_000005.bin
+     * SAVE  job/CtrI31_/BgD/uvc_000005.bin
+     * SAVE  job/CtrI31_/BgD/Bfd_000006.bin
+     * SAVE  job/CtrI31_/BgD/frp_000006.bin
+     * SAVE  job/CtrI31_/BgD/Jcr_000006.bin
+     * SAVE  job/CtrI31_/BgD/uvc_000006.bin
+     * SAVE  job/CtrI31_/BgD/Bfd_000007.bin
+     * SAVE  job/CtrI31_/BgD/frp_000007.bin
+     * SAVE  job/CtrI31_/BgD/Jcr_000007.bin
+     * SAVE  job/CtrI31_/BgD/uvc_000007.bin
+     * SAVE  job/CtrI31_/BgD/Bfd_000008.bin
+     * SAVE  job/CtrI31_/BgD/frp_000008.bin
+     * SAVE  job/CtrI31_/BgD/Jcr_000008.bin
+     * SAVE  job/CtrI31_/BgD/uvc_000008.bin
+     * SAVE  job/CtrI31_/BgD/Bfd_000009.bin
+     * SAVE  job/CtrI31_/BgD/frp_000009.bin
+     * SAVE  job/CtrI31_/BgD/Jcr_000009.bin
+     * SAVE  job/CtrI31_/BgD/uvc_000009.bin
+     * SAVE  job/CtrI31_/BgD/Bfd_000010.bin
+     * SAVE  job/CtrI31_/BgD/frp_000010.bin
+     * SAVE  job/CtrI31_/BgD/Jcr_000010.bin
+     * SAVE  job/CtrI31_/BgD/uvc_000010.bin
+     * SAVE  job/CtrI31_/BgD/Bfd_000011.bin
+     * SAVE  job/CtrI31_/BgD/frp_000011.bin
+     * SAVE  job/CtrI31_/BgD/Jcr_000011.bin
+     * SAVE  job/CtrI31_/BgD/uvc_000011.bin
+     * SAVE  job/CtrI31_/BgD/Bfd_000012.bin
+     * SAVE  job/CtrI31_/BgD/frp_000012.bin
+     * SAVE  job/CtrI31_/BgD/Jcr_000012.bin
+     * SAVE  job/CtrI31_/BgD/uvc_000012.bin
+     * SAVE  job/CtrI31_/BgD/Bfd_000013.bin
+     * SAVE  job/CtrI31_/BgD/frp_000013.bin
+     * SAVE  job/CtrI31_/BgD/Jcr_000013.bin
+     * SAVE  job/CtrI31_/BgD/uvc_000013.bin
+     * SAVE  job/CtrI31_/BgD/Bfd_000014.bin
+     * SAVE  job/CtrI31_/BgD/frp_000014.bin
+     * SAVE  job/CtrI31_/BgD/Jcr_000014.bin
+     * SAVE  job/CtrI31_/BgD/uvc_000014.bin
+     * SAVE  job/CtrI31_/BgD/Bfd_000015.bin
+     * SAVE  job/CtrI31_/BgD/frp_000015.bin
+     * SAVE  job/CtrI31_/BgD/Jcr_000015.bin
+     * SAVE  job/CtrI31_/BgD/uvc_000015.bin
+     * SAVE  job/CtrI31_/BgD/Bfd_000016.bin
+     * SAVE  job/CtrI31_/BgD/frp_000016.bin
+     * SAVE  job/CtrI31_/BgD/Jcr_000016.bin
+     * SAVE  job/CtrI31_/BgD/uvc_000016.bin
+     * SAVE  job/CtrI31_/BgD/Bfd_000017.bin
+     * SAVE  job/CtrI31_/BgD/frp_000017.bin
+     * SAVE  job/CtrI31_/BgD/Jcr_000017.bin
+     * SAVE  job/CtrI31_/BgD/uvc_000017.bin
+     * SAVE  job/CtrI31_/BgD/Bfd_000018.bin
+     * SAVE  job/CtrI31_/BgD/frp_000018.bin
+     * SAVE  job/CtrI31_/BgD/Jcr_000018.bin
+     * SAVE  job/CtrI31_/BgD/uvc_000018.bin
+     * SAVE  job/CtrI31_/BgD/Bfd_000019.bin
+     * SAVE  job/CtrI31_/BgD/frp_000019.bin
+     * SAVE  job/CtrI31_/BgD/Jcr_000019.bin
+     * SAVE  job/CtrI31_/BgD/uvc_000019.bin
+     * SAVE  job/CtrI31_/BgD/Bfd_000020.bin
+     * SAVE  job/CtrI31_/BgD/frp_000020.bin
+     * SAVE  job/CtrI31_/BgD/Jcr_000020.bin
+     * SAVE  job/CtrI31_/BgD/uvc_000020.bin
+     * SAVE  job/CtrI31_/BgD/Bfd_000021.bin
+     * SAVE  job/CtrI31_/BgD/frp_000021.bin
+     * SAVE  job/CtrI31_/BgD/Jcr_000021.bin
+     * SAVE  job/CtrI31_/BgD/uvc_000021.bin
+     * SAVE  job/CtrI31_/BgD/Bfd_000022.bin
+     * SAVE  job/CtrI31_/BgD/frp_000022.bin
+     * SAVE  job/CtrI31_/BgD/Jcr_000022.bin
+     * SAVE  job/CtrI31_/BgD/uvc_000022.bin
+     * SAVE  job/CtrI31_/BgD/Bfd_000023.bin
+     * SAVE  job/CtrI31_/BgD/frp_000023.bin
+     * SAVE  job/CtrI31_/BgD/Jcr_000023.bin
+     * SAVE  job/CtrI31_/BgD/uvc_000023.bin
+     * SAVE  job/CtrI31_/BgD/Bfd_000024.bin
+     * SAVE  job/CtrI31_/BgD/frp_000024.bin
+     * SAVE  job/CtrI31_/BgD/Jcr_000024.bin
+     * SAVE  job/CtrI31_/BgD/uvc_000024.bin
+     * SAVE  job/CtrI31_/BgD/Bfd_000025.bin
+     * SAVE  job/CtrI31_/BgD/frp_000025.bin
+     * SAVE  job/CtrI31_/BgD/Jcr_000025.bin
+     * SAVE  job/CtrI31_/BgD/uvc_000025.bin
+     * SAVE  job/CtrI31_/BgD/Bfd_000026.bin
+     * SAVE  job/CtrI31_/BgD/frp_000026.bin
+     * SAVE  job/CtrI31_/BgD/Jcr_000026.bin
+     * SAVE  job/CtrI31_/BgD/uvc_000026.bin
+     * SAVE  job/CtrI31_/BgD/Bfd_000027.bin
+     * SAVE  job/CtrI31_/BgD/frp_000027.bin
+     * SAVE  job/CtrI31_/BgD/Jcr_000027.bin
+     * SAVE  job/CtrI31_/BgD/uvc_000027.bin
+     * SAVE  job/CtrI31_/BgD/Bfd_000028.bin
+     * SAVE  job/CtrI31_/BgD/frp_000028.bin
+     * SAVE  job/CtrI31_/BgD/Jcr_000028.bin
+     * SAVE  job/CtrI31_/BgD/uvc_000028.bin
+     * SAVE  job/CtrI31_/BgD/Bfd_000029.bin
+     * SAVE  job/CtrI31_/BgD/frp_000029.bin
+     * SAVE  job/CtrI31_/BgD/Jcr_000029.bin
+     * SAVE  job/CtrI31_/BgD/uvc_000029.bin
+     * SAVE  job/CtrI31_/BgD/Bfd_000030.bin
+     * SAVE  job/CtrI31_/BgD/frp_000030.bin
+     * SAVE  job/CtrI31_/BgD/Jcr_000030.bin
+     * SAVE  job/CtrI31_/BgD/uvc_000030.bin
+     * SAVE  job/CtrI31_/BgD/Bfd_000031.bin
+     * SAVE  job/CtrI31_/BgD/frp_000031.bin
+     * SAVE  job/CtrI31_/BgD/Jcr_000031.bin
+     * SAVE  job/CtrI31_/BgD/uvc_000031.bin
+     * SAVE  job/CtrI31_/BgD/Bv0.dat
+       job/CtrI31_/BgD/ijDomain.dat    has been outputted...
+ 
+ 
+  ----------------------------------------------------------------------
+  [ jxB_Force     @jxBcheckMod ]
+      -- Cylindrical Coordinate --
+          a1 :: Fz
+          a2 :: Fr
+ 
+                         ( Min ) | (Max)
+           a1 : -0.10603E+00 |  0.10603E+00
+           a2 : -0.57120E-01 |  0.56344E-01
+          |a| :  0.12662E-12 |  0.11399E+00
+ 
+ 
+  ======================================================================
+  =============     Flux-Tube Equilibrium Solver  - END -   ============
+  ======================================================================
+ 

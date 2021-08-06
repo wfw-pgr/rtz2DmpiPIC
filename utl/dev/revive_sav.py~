@@ -1,0 +1,10 @@
+
+import subprocess
+
+dlist = [ 'dat'   ]
+blist = [ 'beami', 'field', 'oldEB', 'param', 'ptspc' ]
+plist = [ 'prtcl' ]
+
+job   = 'tlr04-04'
+
+cmd   = 'mv ' + job + '_' + dlist[k] + '_' + czero + '.bin'

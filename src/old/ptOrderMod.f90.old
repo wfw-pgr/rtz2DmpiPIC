@@ -1,0 +1,74 @@
+module ptOrderMod
+  use constants, only  : ns
+  implicit none
+  integer             :: exptc(ns)
+contains
+  
+  subroutine getCellIndex
+    use constants , only : LIs, LJs, drInv, dzInv
+    use constants , only : ns , np , OMPNumThreads
+    use constants , only : xp_, zp_, wp_
+    use variables , only : pxv, pCellIdx
+    !$ use omp_lib
+    implicit none
+    integer             :: k, m, ip, jp, ith
+    integer             :: exCount(OMPNumThreads)
+    do k=1, ns
+       exCount = 0
+       !$omp parallel default(none) &
+       !$omp shared(k,np,pxv,pCellIdx,dzInv,drInv,LIs,LJs,exCount) &
+       !$omp private(m,ip,jp,ith)
+       !$ ith = omp_get_thread_num() + 1
+       !$omp do
+       do m=1, np(k)
+          if ( pxv(wp_,m,k).gt.0.d0 ) then
+             ip            = ceiling( pxv(zp_,m,k)*dzInv ) 
+             jp            = ceiling( pxv(xp_,m,k)*drInv )
+             pCellIdx(m,k) = (LIs-2)*(jp-1) + ip
+          else
+             pCellIdx(m,k) = (LIs-2)*(LJs-2)+1
+             exCount(ith)  = exCount(ith) + 1
+          endif
+       enddo
+       !$omp end do
+       !$omp end parallel
+       exptc(k) = sum( exCount )
+    enddo
+    
+    return
+  end subroutine getCellIndex
+
+
+  subroutine ptReOrdering
+    use constants , only : LIs, LJs, ns, np, npc, npt, nptMax, OMPNumThreads
+    use variables , only : pxv, pCellIdx
+    use sortingMod, only : ParallelSort
+    implicit none
+    integer             :: k, m
+
+    ! --- [1] Acquire Cell Index  ( Sorting Order )  --- !
+    call getCellIndex
+    ! --- [2] Particle Sorting according to pCellIdx --- !
+    do k=1, ns
+       call ParallelSort( nptMax, pCellIdx(1:nptMax,k), 1, np(k),     &
+            &                     pxv (1:8,1:nptMax,k), OMPNumThreads )
+    enddo
+    ! --- [3] np & npc Management                    --- !
+    do k=1, ns
+       do m=np(k), 1, -1
+          if ( pCellIdx(m,k).lt.(LIs-2)*(LJs-2)+1 ) then
+             np (k) = m
+             exit
+          endif
+       enddo
+    enddo
+    npt = 0
+    do k=1, ns
+       npc(k) = np(k)
+       npt    = npt + npc(k)
+    enddo
+    
+    return
+  end subroutine ptReOrdering
+
+end module ptOrderMod

@@ -1,0 +1,6 @@
+;;; --- データ取得用ルーチン --- ;;;
+.r idl/util/loadconst
+.r idl/util/fetch_field
+.r idl/field/gazer
+
+@idl/debuger/debuger.idl

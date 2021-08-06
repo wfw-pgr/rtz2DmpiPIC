@@ -1,0 +1,376 @@
+module RgridRZMod
+  use constants, only : N1, N2
+  implicit none
+  integer, parameter :: LIr = N1+1
+  integer, parameter :: LJr = N2+1
+  integer            :: bx_, by_, bz_, jx_, jy_, jz_
+  integer            :: br_, bt_, jr_, jt_
+  integer            :: at_ = 1, rh_ = 2, pr_ = 3
+  double precision   :: rf(LJr+1), rh(LJr+1), rfinv(LJr+1), rhinv(LJr+1)
+  double precision   :: BgR(3,LIr,LJr), JgR(3,LIr,LJr), fgR(LIr,LJr,3), ugR(LIr,LJr,3)
+contains
+
+
+  subroutine RgridField( coordinate, onGrid )
+    implicit none
+    character(1), intent(in) :: onGrid
+    character(2), intent(in) :: coordinate
+    if ( coordinate.eq.'XZ' ) then
+       bx_=1; by_=2; bz_=3
+       jx_=1; jy_=2; jz_=3
+    endif
+    if ( coordinate.eq.'RZ' ) then
+       br_=1; bt_=2; bz_=3
+       jr_=1; jt_=2; jz_=3
+    endif
+    
+    if ( ( coordinate.eq.'XZ' ).and.( onGrid.eq.'R' ) ) call Cartesian__RegularGrid
+    if ( ( coordinate.eq.'RZ' ).and.( onGrid.eq.'R' ) ) call Cylindric__RegularGrid
+    return
+  end subroutine RgridField
+  
+  
+  
+  subroutine Cartesian__RegularGrid
+    use constants, only : Bmax, valfe, normType, normSW, MergingType, symmBreak, Flag__ReverseBt
+    use variables, only : dx1, dx2, Avp, Bfd
+    implicit none
+    integer            :: i, j
+    double precision   :: dx1inv, dx2inv, coef, absB2Max, BtSign1, BtSign2
+    double precision   :: AvpExt(LIr+1,LJr+1)
+
+    ! ---------------------------------- !
+    ! --- [1]    Extend Avp Field    --- !
+    ! ---------------------------------- !
+    !  -- [1-1] Change Polarity (Bt) --  !
+    select case( MergingType )
+    case( 'CoHx' )
+       BtSign1 = + ( 1.d0 + symmBreak )
+       BtSign2 = + ( 1.d0 - symmBreak )
+    case( 'CtrI' )
+       BtSign1 = + ( 1.d0 + symmBreak )
+       Btsign2 = - ( 1.d0 - symmBreak )
+    case( 'CtrO' )
+       BtSign1 = - ( 1.d0 + symmBreak )
+       Btsign2 = + ( 1.d0 - symmBreak )
+    case default
+       write(6,*) '[Cartesian_EgridField-@EgridRZMod.f90] MergingType == ??', MergingType
+       stop
+    end select
+    if ( Flag__ReverseBt ) then
+       BtSign1 = -1.d0 * BtSign1
+       BtSign2 = -1.d0 * BtSign2
+    endif
+    do j=1, N2
+       do i=1, N1/2
+          Bfd(3,i,j) = BtSign1 * Bfd(3,i,j)
+       enddo
+    enddo
+    do j=1, N2
+       do i=N1/2+1, N1
+          Bfd(3,i,j) = BtSign2 * Bfd(3,i,j)
+       enddo
+    enddo !   --  By  --  !
+
+    !   -- [1-1] Get AvpExt          -- !
+    do j=2, LJr
+       do i=2, LIr
+          AvpExt(i,j)  = Avp(  i-1,j-1)
+          BgR(by_,i,j) = Bfd(3,i-1,j-1)
+       enddo
+    enddo
+    AvpExt(    1,:) = AvpExt(  2,:) + ( AvpExt(  2,:) - AvpExt(    3,:) )
+    AvpExt(LIr+1,:) = AvpExt(LIr,:) + ( AvpExt(LIr,:) - AvpExt(LIr-1,:) )
+    AvpExt(:,    1) = AvpExt(:,  2) + ( AvpExt(:,  2) - AvpExt(:,    3) )
+    AvpExt(:,LJr+1) = AvpExt(:,LJr) + ( AvpExt(:,LJr) - AvpExt(:,LJr-1) )
+    BgR(by_,1,:)    = BgR(by_,2,:)
+    BgR(by_,:,1)    = BgR(by_,:,2)
+    !   -- [1-2] fgR :: Flux -- !
+    fgR(:,:,at_)    = AvpExt(1:LIr,1:LJr)
+
+    !  --- [2] Magnetic Field  :: B --- !
+    !   -- [2-1] Calculate B-field   -- !
+    dx1inv = 1.d0 / ( 2.d0 * dx1 )
+    dx2inv = 1.d0 / ( 2.d0 * dx2 )
+    do j=2, LJr
+       do i=2, LIr
+          BgR(bx_,i,j) = - ( AvpExt(i+1,j) - AvpExt(i-1,j) ) * dx1inv
+          BgR(bz_,i,j) = + ( AvpExt(i,j+1) - AvpExt(i,j-1) ) * dx2inv
+       enddo
+    enddo
+    BgR(1:2,  2,  2) = 0.d0
+    BgR(1:2,  2,LJr) = 0.d0
+    BgR(1:2,LIr,  2) = 0.d0
+    BgR(1:2,LIr,LJr) = 0.d0
+
+    !   -- [2-2] Outer Boundary Condition  -- !
+    BgR(bx_,1,:) = BgR(bx_,2,:)
+    BgR(bz_,1,:) = BgR(bz_,2,:)
+    BgR(by_,1,:) = BgR(by_,2,:)
+    BgR(bx_,:,1) = BgR(bx_,:,2)
+    BgR(bz_,:,1) = BgR(bz_,:,2)
+    BgR(by_,:,1) = BgR(by_,:,2)
+    BgR(by_,:,1) = BgR(by_,:,2)
+    !   -- [2-3] Normalize B-field   -- !
+    if ( normSW ) then
+       absB2Max = 0.d0
+       do j=1, LJr
+          do i=1, LIr
+             absB2Max = max( absB2Max, BgR(bx_,i,j)**2 + BgR(by_,i,j)**2 + BgR(bz_,i,j)**2 )
+          enddo
+       enddo
+       absB2Max = Bmax / sqrt( absB2Max )
+       do j=1, LJr
+          do i=1, LIr
+             BgR(bx_,i,j) = absB2Max * BgR(bx_,i,j)
+             BgR(by_,i,j) = absB2Max * BgR(by_,i,j)
+             BgR(bz_,i,j) = absB2Max * BgR(bz_,i,j)
+             fgR(i,j,at_) = absB2Max * fgR(i,j,at_)
+          enddo
+       enddo
+    endif
+
+    !  --- [3] Current Density :: J --- !
+    if ( normType.eq.'PIC' ) coef = valfe**2
+    if ( normType.eq.'MHD' ) coef = 1.d0
+    do j=3, LJr-1
+       do i=3, LIr-1
+          JgR(jx_,i,j) = coef * ( - ( BgR(by_,i+1,j  ) - BgR(by_,i-1,j  ) ) * dx1inv )
+          JgR(jy_,i,j) = coef * ( + ( BgR(bz_,i  ,j+1) - BgR(bz_,i  ,j-1) ) * dx2inv &
+               &                  - ( BgR(bx_,i+1,j  ) - BgR(bx_,i-1,j  ) ) * dx1inv )
+          JgR(jz_,i,j) = coef * ( + ( BgR(by_,i  ,j+1) - BgR(by_,i  ,j-1) ) * dx2inv )
+       enddo
+    enddo
+    ! -- B.C. -- !
+    JgR(:,  1,:) = 0.d0
+    JgR(:,  2,:) = 0.d0
+    JgR(:,LIr,:) = 0.d0
+    JgR(:,:,  1) = 0.d0
+    JgR(:,:,  2) = 0.d0
+    JgR(:,:,LJr) = 0.d0
+
+    !  --- [4] Rho and Pressure :: rho, p --- !
+    call setPrsrRho
+
+    return
+  end subroutine Cartesian__RegularGrid
+
+  
+  subroutine Cylindric__RegularGrid
+
+    use constants, only : Bmax, valfe, x2min, normType, MergingType, normSW, symmBreak, Flag__ReverseBt
+    use variables, only : dx1, dx2, Avp, Bfd
+    implicit none
+    integer            :: i, j
+    double precision   :: dx1inv, dx2inv, coef, absB2Max, BtSign1, BtSign2
+    double precision   :: AvpExt(LIr+1,LJr+1)
+
+    !   -- [1-1] Grid Making  -- !
+    do j=1, LJr+1
+       rf(j) = dx2*dble(j-2) + x2min
+       rh(j) = dx2*dble(j-2) + x2min + 0.5d0*dx2
+    enddo
+    rfinv(:) = 0.d0
+    rhinv(:) = 0.d0
+    do j=1, LJr+1
+       if ( rf(j).ne.0.d0 ) rfinv(j) = 1.d0 / rf(j)
+       if ( rh(j).ne.0.d0 ) rhinv(j) = 1.d0 / rh(j)
+    enddo
+    
+    !  -- [1-2] Change Polarity of Bt -- !
+    select case( MergingType )
+    case( 'CoHx' )
+       BtSign1 = + ( 1.d0 + symmBreak )
+       BtSign2 = + ( 1.d0 - symmBreak )
+    case( 'CtrI' )
+       BtSign1 = + ( 1.d0 + symmBreak )
+       Btsign2 = - ( 1.d0 - symmBreak )
+    case( 'CtrO' )
+       BtSign1 = - ( 1.d0 + symmBreak )
+       Btsign2 = + ( 1.d0 - symmBreak )
+    case default
+       write(6,*) '[Cartesian_EgridField-@EgridRZMod.f90] MergingType == ??', MergingType
+       stop
+    end select
+    if ( Flag__ReverseBt ) then
+       BtSign1 = -1.d0 * BtSign1
+       BtSign2 = -1.d0 * BtSign2
+    endif
+    do j=1, N2
+       do i=1, N1/2
+          Bfd(3,i,j) = BtSign1 * Bfd(3,i,j)
+       enddo
+    enddo
+    do j=1, N2
+       do i=N1/2+1, N1
+          Bfd(3,i,j) = BtSign2 * Bfd(3,i,j)
+       enddo
+    enddo !   --  Bt  --  !
+
+    !   -- [1-3] Get AvpExt          -- !
+    do j=2, LJr
+       do i=2, LIr
+          AvpExt(i,j) = Avp(  i-1,j-1)
+          BgR (2,i,j) = Bfd(3,i-1,j-1)
+       enddo
+    enddo
+    AvpExt(:,    1) = (  rf(  2) * AvpExt(:,  2) &
+         &            + ( rf(  2)*AvpExt(:,  2) - rf(    3)*AvpExt(:,    3) ) ) * rfinv(    1)
+    AvpExt(:,LJr+1) = (  rf(LJr) * AvpExt(:,LJr) &
+         &            + ( rf(LJr)*AvpExt(:,LJr) - rf(LJr-1)*AvpExt(:,LJr-1) ) ) * rfinv(LJr+1)
+    AvpExt(    1,:) = AvpExt(  2,:) + ( AvpExt(  2,:) - AvpExt(    3,:) )
+    AvpExt(LIr+1,:) = AvpExt(LIr,:) + ( AvpExt(LIr,:) - AvpExt(LIr-1,:) )
+    BgR(bt_,1,:)      = BgR(bt_,2,:)
+    BgR(bt_,:,1)      = rf(2) * rfinv(1) * BgR(bt_,:,2)
+    if ( x2min.eq.0.d0 ) then
+       AvpExt(:,1)  = - AvpExt(:,3)
+       BgR (2,:,1)  = - BgR (2,:,3)
+    endif
+    !   -- [1-2] fgR :: At -- !
+    do j=1, LJr
+       do i=1, LIr
+          fgR(i,j,at_) = AvpExt(i,j)
+       enddo
+    enddo
+    
+    !  --- [2] Magnetic Field  :: B --- !
+    !   -- [2-1] Calculate B-field   -- !
+    dx1inv = 1.d0 / ( 2.d0 * dx1 )
+    dx2inv = 1.d0 / ( 2.d0 * dx2 )
+    do j=2, LJr
+       do i=2, LIr
+          BgR(br_,i,j) = - (         AvpExt(i+1,j) -         AvpExt(i-1,j) )            * dx1inv
+          BgR(by_,i,j) = + ( rf(j+1)*AvpExt(i,j+1) - rf(j-1)*AvpExt(i,j-1) ) * rfinv(j) * dx2inv
+       enddo
+    enddo
+    
+    !   -- [2-2] Boundary Condition  -- !
+    BgR(br_,1,:) = BgR(br_,2,:)
+    BgR(bt_,1,:) = BgR(bt_,2,:)
+    BgR(by_,1,:) = BgR(by_,2,:)
+    BgR(br_,:,1) = BgR(br_,:,2)
+    BgR(bt_,:,1) = BgR(bt_,:,2)
+    BgR(by_,:,1) = BgR(by_,:,3)
+    if ( rf(2).eq.0.d0 ) BgR(by_,:,2) = BgR(by_,:,3)
+    !   -- [2-3] Normalize B-field   -- !
+    if ( normSW ) then
+       absB2Max = 0.d0
+       do j=1, LJr
+          do i=1, LIr
+             absB2Max = max( absB2Max, BgR(br_,i,j)**2+BgR(bt_,i,j)**2+BgR(by_,i,j)**2 )
+          enddo
+       enddo
+       absB2Max = Bmax / sqrt( absB2Max )
+       do j=1, LJr
+          do i=1, LIr
+             BgR(br_,i,j) = absB2Max * BgR(br_,i,j)
+             BgR(bt_,i,j) = absB2Max * BgR(bt_,i,j)
+             BgR(by_,i,j) = absB2Max * BgR(by_,i,j)
+             fgR(i,j,at_) = absB2Max * fgR(i,j,at_)
+          enddo
+       enddo
+    endif
+
+    !  --- [3] Current Density :: J --- !
+    if ( normType.eq.'PIC' ) coef = valfe**2
+    if ( normType.eq.'MHD' ) coef = 1.d0
+    do j=3, LJr-1
+       do i=3, LIr-1
+          JgR(jr_,i,j) = coef * ( - dx1inv * ( BgR(bt_,i+1,j) - BgR(bt_,i-1,j) ) )
+          JgR(jt_,i,j) = coef * ( + dx1inv * ( BgR(br_,i+1,j) - BgR(br_,i-1,j) ) &
+               &                  - dx2inv * ( BgR(by_,i,j+1) - BgR(by_,i,j-1) ) )
+          JgR(jz_,i,j) = coef * (   + dx2inv * rfinv(j) &
+               &              * (   rf(j+1)*BgR(bt_,i,j+1) - rf(j-1)*BgR(bt_,i,j-1) ) )
+       enddo
+    enddo
+    ! -- B.C. -- !
+    JgR(:,  1,:) = 0.d0
+    JgR(:,  2,:) = 0.d0
+    JgR(:,LIr,:) = 0.d0
+    JgR(:,:,  1) = 0.d0
+    JgR(:,:,  2) = 0.d0
+    JgR(:,:,LJr) = 0.d0
+
+    !  --- [4] Rho and Pressure :: rho, p --- !
+    call setPrsrRho
+    
+    return
+  end subroutine Cylindric__RegularGrid
+  
+  
+  subroutine setPrsrRho
+    use constants, only          : vthcv, TiTe, desiredBeta, normType, valfe, BetaMode, coordinate
+    use variables, only          : dx1, dx2
+    implicit none
+    integer                     :: i, j
+    double precision            :: PMag, Svol, pMax, Ttot, coef, vol(LJr)
+    double precision, parameter :: pi       = 4.d0*atan( 1.d0 )
+    double precision, parameter :: onethird = 1.d0 / 3.d0
+
+    if ( trim(BetaMode).eq."MaxOfabsB" ) then
+       !  -- [1-1] Find Max |B|^2 --  !
+       PMag = 0.d0
+       do j=2, LJr
+          do i=2, LIr
+             PMag = max( PMag, BgR(1,i,j)**2 + BgR(2,i,j)**2 + BgR(3,i,j)**2 )
+          enddo
+       enddo
+    endif
+    if ( trim(BetaMode).eq."EnergyOfB" ) then    
+       !  -- [1-2] Calc. Total Energy --  !
+       vol(:) = 0.d0
+       if ( coordinate.eq."XZ" ) then
+          do j=2, LJr
+             vol(j) = dx1*dx2
+          enddo
+       endif
+       if ( coordinate.eq."RZ" ) then
+          do j=2, LJr
+             vol(j) = dx1*dx2*2.d0*pi*rh(j)
+          enddo
+       endif
+       Svol = 0.d0
+       PMag = 0.d0
+       do j=2, LJr
+          do i=2, LIr
+             Svol = Svol + vol(j)
+             PMag = PMag + ( BgR(1,i,j)**2 + BgR(2,i,j)**2 + BgR(3,i,j)**2 )*vol(j)
+          enddo
+       enddo
+       PMag = PMag / Svol
+    endif
+    ! --- [2] set Pressure  --- !
+    if ( normType.eq.'PIC' ) coef = valfe**2
+    if ( normType.eq.'MHD' ) coef = 1.d0
+    pMax  = desiredBeta * onethird*PMag * coef
+    do j=1, LJr
+       do i=1, LIr
+          fgR(i,j,pr_) = pMax
+       enddo
+    enddo
+    ! --- [3] set rho --- !
+    if ( normType.eq.'PIC' ) Ttot = ( 1.d0 + TiTe ) * vthcv**2
+    if ( normType.eq.'MHD' ) Ttot = pMax
+    coef =  1.d0 / Ttot
+    do j=1, LJr
+       do i=1, LIr
+          fgR(i,j,rh_) = coef * fgR(i,j,pr_)
+       enddo
+    enddo
+    write(6,'(2x,a)'      ) '[ setPrsrRho      @ BgridMod ]'
+    write(6,'(5x,a,f12.6)') ' Set Pressure as constant :: P0 ===  ', fgR(2,2,pr_)
+    write(6,'(5x,a,f12.6)') ' Set density  as constant :: n0 ===  ', fgR(2,2,rh_)
+    ! --- [4] Get Electron Flow Velocity ---  !
+    do j=1, LJr
+       do i=1, LIr
+          ugR(i,j,1)   = - JgR(1,i,j) / fgR(i,j,rh_)
+          ugR(i,j,2)   = - JgR(2,i,j) / fgR(i,j,rh_)
+          ugR(i,j,3)   = - JgR(3,i,j) / fgR(i,j,rh_)
+       enddo
+    enddo
+
+    return
+  end subroutine setPrsrRho
+
+  
+end module RgridRZMod

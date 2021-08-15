@@ -1,7 +1,7 @@
 module constants
   implicit none
   ! ---   Job    --- !
-  character(20)               :: job           = 'sFRC02_'
+  character(20)               :: job           = 'test01_'
   character(2)                :: coordinate    = 'RZ'
   character(3)                :: bctype        = 'pcw'
   character(3)                :: solver        = 'BCG'
@@ -17,14 +17,16 @@ module constants
   logical         , parameter :: BgridMode     = .true.
   
   ! --- Parallel --- !
-  integer         , parameter :: OMPNumThreads = 4
-  integer         , parameter :: PEtot         = 16
-  integer         , parameter :: PEpic         = 16
+  integer         , parameter :: OMPNumThreads = 2
+  integer         , parameter :: PEtot         = 2
+  integer         , parameter :: PEpic         = 2
   integer                     :: myRank
   
   ! ---   Grid   --- !
-  integer         , parameter :: Nr            = 512
-  integer         , parameter :: Nz            = 1024     ! - Nr, Nz must be PEtot*Segment - !
+  integer         , parameter :: Nr            = 256
+  integer         , parameter :: Nz            = 512     ! - Nr, Nz must be PEtot*Segment - !
+  ! integer         , parameter :: Nr            = 512
+  ! integer         , parameter :: Nz            = 1024     ! - Nr, Nz must be PEtot*Segment - !
   integer         , parameter :: Nmid          = 50
   double precision            :: rMin          = + 0.d0
   double precision            :: rMax          = + 2.d0

@@ -3,10 +3,10 @@ module constants
   ! ------------------------------------- !
   ! --- [1] Job / Directory Settings  --- !
   ! ------------------------------------- !
-  character(20)                 :: job             = 'CtrI31_12'
-  character(20)                 :: savedjob        = 'CtrI31_11'
-  character(20)                 :: equJob          = 'CtrI31_'
-  character(20)                 :: equType         = 'stanierTube'
+  character(20)                 :: job             = 'test01_01'
+  character(20)                 :: savedjob        = 'test01_01'
+  character(20)                 :: equJob          = 'test01_'
+  character(20)                 :: equType         = 'stanierTube' !  "stanierTube" / "mpiGS"
   character(20)                 :: equGrid         = 'BgD'
   character(25)                 :: jobDir
   character(30)                 :: binDir, datDir, savDir
@@ -14,8 +14,8 @@ module constants
   ! ------------------------------------- !
   ! --- [2] Parallelization Settings  --- !
   ! ------------------------------------- !
-  integer, parameter            :: OMPNumThreads   = 4
-  integer, parameter            :: PEtot           = 32
+  integer, parameter            :: OMPNumThreads   = 2
+  integer, parameter            :: PEtot           = 4
   integer                       :: myRank
   character(6)                  ::  cRank
   ! ------------------------------------- !
@@ -23,14 +23,17 @@ module constants
   ! ------------------------------------- !
   !  -- [3-1] Sim.Size                --  !
   integer                       :: LIs, LJs
-  integer, parameter            :: LI              = 1024 + 1
-  integer, parameter            :: LJ              =  512 + 1
+  integer, parameter            :: LI              = 256 + 1
+  integer, parameter            :: LJ              = 128 + 1
   !  -- [3-2] #.of particles          --  !
   integer, parameter            :: ns              = 2
-  integer, parameter            :: ppcMax          = 256
-  integer, parameter            :: ppcMin          = 16
+  ! integer, parameter            :: ppcMax          = 256
+  integer, parameter            :: ppcMax          = 16
+  ! integer, parameter            :: ppcMin          = 16
+  integer, parameter            :: ppcMin          = 4
   integer, parameter            :: ppcMargin       = 1
-  integer, parameter            :: ppcInit         = 128
+  ! integer, parameter            :: ppcInit         = 128
+  integer, parameter            :: ppcInit         = 8
   integer, parameter            :: nptTot          = (LI-2)*(LJ-2)*ppcMax
   integer                       :: nptMax          = nptTot / PEtot
   integer                       :: npt             = (LI-1)*(LJ-1)*ppcInit*ns/PEtot
@@ -41,7 +44,7 @@ module constants
   ! ------------------------------------- !
   ! --- [4] Physical  Parameters      --- !
   ! ------------------------------------- !
-  double precision, parameter   :: mr              = 25.d0        !    mi / me
+  double precision, parameter   :: mr              = 25.d0         !    mi / me
   double precision, parameter   :: isoThr          = 1.41421356d0  ! Tperp / Tpara  
   double precision, parameter   :: nuwce           = 1.d-6         ! Collision Frequency
   double precision, parameter   :: prtrb_coef      = 0.0d0
@@ -74,9 +77,9 @@ module constants
   ! ------------------------------------- !
   ! --- [7] Start & End Settings      --- !
   ! ------------------------------------- !
-  integer                       :: kstart          =  145400
-  integer, parameter            :: itermax         = 1200000
-  logical, parameter            :: Flag__LoadSave  = .true.
+  integer                       :: kstart          =    0
+  integer, parameter            :: itermax         = 1000
+  logical, parameter            :: Flag__LoadSave  = .false.
   character(9)                  :: wallLimit       = "200:00:00"
   logical                       :: Flag__wallElapsed
   logical, parameter            :: Flag__InitialdivEfix = .false.

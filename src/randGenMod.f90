@@ -7,7 +7,9 @@ module randGenMod
   double precision   :: multi_devStock(OMPNumThreads)
 contains
 
-  
+  ! ====================================================== !
+  ! === Initialize Seed value of the random (mt19937)  === !
+  ! ====================================================== !
   subroutine InitRandomSeed
     use constants, only : OMPNumThreads, myRank, PEtot
     use mt19937Mod
@@ -25,6 +27,7 @@ contains
     devStock          = 0.d0
     multi_flipflop(:) = 0
     multi_devStock(:) = 0.d0
+    seeds(:)          = 0
 
     ! ---------------------------------------------------------------------------------- !
     ! --- [2] Call sgrnd for MT19937 Routines. :: arbitrary determined value... seed --- !

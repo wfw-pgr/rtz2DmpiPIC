@@ -1,5 +1,8 @@
 program EquMain
 
+  ! ------------------------------------------------------ !
+  ! --- [1] constants & variables / Routines           --- !
+  ! ------------------------------------------------------ !
   use constants , only : myRank, PEtot, coordinate, RgridMode, BgridMode
   use myutil    , only : MakeJobFile, TimeMeasure
   use initialMod, only : InitCond
@@ -15,9 +18,10 @@ program EquMain
   include 'mpif.h'
   integer             :: ierr, PEtoth
 
-  ! ----------------------- !
-  ! --  MPI  Initialize  -- !
-  ! ----------------------- !
+  ! ------------------------------------------------------ !
+  ! --- [2] Initial Preparation                        --- !
+  ! ------------------------------------------------------ !
+  !  -- [2-1] MPI settings                             --  !
   call MPI_Init( ierr )
   call MPI_Comm_Rank( MPI_COMM_WORLD, myRank, ierr )
   call MPI_Comm_Size( MPI_COMM_WORLD, PEtoth, ierr )
@@ -26,9 +30,8 @@ program EquMain
           &     ' : ', PEtoth, '[ERROR]'
      stop
   endif
-  ! ----------------------- !
-  ! --  Opening Remarks  -- !
-  ! ----------------------- !
+  
+  !  -- [2-2] Opening Remarks                          --  !
   if ( myRank.eq.0 ) then
      write(6,*)
      write(6,*) '  -------------------------------------------  '
@@ -37,23 +40,24 @@ program EquMain
      write(6,*)
      write(6,*)
   endif
-  ! ----------------------- !
-  ! --  Initialization   -- !
-  ! ----------------------- !
+
+  ! ------------------------------------------------------ !
+  ! --- [3] Initialization                             --- !
+  ! ------------------------------------------------------ !
   call TimeMeasure( 0 )
   call MakeJobFile
   call InitCond
   call TimeMeasure( 1 )
   
-  ! -------------------------------- !
-  ! -- Grad-Shafranov Eq. Solving -- !
-  ! -------------------------------- !
+  ! ------------------------------------------------------ !
+  ! --- [4] Grad-Shafranov Eq. Solving                 --- !
+  ! ------------------------------------------------------ !
   call SolveGS
   call TimeMeasure( 3 )
 
-  ! ----------------------- !
-  ! -- Field Calculation -- !
-  ! ----------------------- !
+  ! ------------------------------------------------------ !
+  ! --- [5] Field Calculation                          --- !
+  ! ------------------------------------------------------ !
   if ( myRank.eq.0 ) then
      
      ! -- (1) Common Part          -- !
@@ -79,9 +83,9 @@ program EquMain
   endif
   call TimeMeasure( 5 )
 
-  ! ------------------------ !
-  ! --  Closing  Program  -- !
-  ! ------------------------ !
+  ! ------------------------------------------------------ !
+  ! --- [6] Closing Program                            --- !
+  ! ------------------------------------------------------ !
   call TimeMeasure( -1 )
   call MPI_Finalize( ierr )
 

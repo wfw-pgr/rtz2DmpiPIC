@@ -3,3 +3,6 @@
 *.png
 *.bin
 *.dat
+job/*
+equ/mpiGS/job/*
+equ/stanierTube/job/*

@@ -33,6 +33,7 @@ contains
     if ( myRank.eq.0 ) call displaySectionTitle( 'INITIALIZATION', '-', 4, 4, 'subsection' )
     call InitVariables
     call InitRandomSeed
+
     call allocExchangeTable_Field    ( LJs )
     call allocExchangeTable_Current  ( LJs )
     call allocExchangeTable_Relocated( LJs )

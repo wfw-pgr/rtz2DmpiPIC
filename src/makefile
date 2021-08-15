@@ -109,11 +109,18 @@ ifeq (${shell hostname},euler.local)
   FFLAGS+=-Wl,-stack_size,0x80000000
   LDFLAGS+=-qopenmp
 endif
+ifeq (${shell hostname},maxwell.local)
+  FC       =mpif90
+  FFLAGS  +=-O3 -fopenmp -fallow-argument-mismatch -fno-range-check
+  LDFLAGS +=
+endif
 # ---  Debug  Options  --- #
-# FFLAGS = -fbacktrace -ffpe-trap=invalid,zero,overflow
-# FFLAGS = -g -traceback
-# FFLAGS = -g -traceback -check-pointers=rw
-# FFLAGS = -g -traceback -check all -warn all -fpe0
+# FFLAGS += -g
+# FFLAGS   += -fbounds-check -fbacktrace -ffpe-trap=invalid,zero,overflow
+# FFLAGS += -fbacktrace -ffpe-trap=invalid,zero,overflow
+# FFLAGS += -g -traceback
+# FFLAGS += -g -traceback -check-pointers=rw
+# FFLAGS += -g -traceback -check all -warn all -fpe0
 # -----------------   Option End   ------------------ #
 
 

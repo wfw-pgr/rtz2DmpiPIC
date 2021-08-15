@@ -55,9 +55,12 @@ ifeq (${shell uname},Linux)
   endif
 endif
 ifeq (${shell uname},Darwin)
-  FC = mpifort
-  LDFLAGS += -qopenmp
-  FFLAGS  += -Wl,-stack_size,0x40000000
+  FC       = mpif90
+  FFLAGS  += -O3 -fopenmp
+  LDFLAGS += 
+  # FC = mpifort
+  # LDFLAGS += -qopenmp
+  # FFLAGS  += -Wl,-stack_size,0x40000000
 endif
 # ---  Debug  Options  --- #
 # FFLAGS = -fbacktrace -ffpe-trap=invalid,zero,overflow

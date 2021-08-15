@@ -42,7 +42,7 @@ program myGSchsmMPI
   call OpeningRemarks
   call PE_Attendance
   call TimeMeasure( 0 )
-
+  
   ! ------------------------------------- !
   ! --- [4]  Initialize Simulation    --- !
   ! ------------------------------------- !

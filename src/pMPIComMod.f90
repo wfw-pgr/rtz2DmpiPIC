@@ -296,6 +296,10 @@ contains
     ! ------------------------------ !
     !  -- [4-2] Send    Info.    --  !
     do neib=1, NeibPEtot
+       ! -- 
+       ! -- (comment) MPI_Isend command is correctly used... -- !
+       ! -- -fallow-argument-mismatch flag is needed when we use gfortran10 & MPICH -- !
+       ! -- 
        call MPI_Isend( export_Items(:,neib), ns, MPI_INTEGER   , NeibPE(neib), 0, &
             &          MPI_COMM_WORLD      , request_Send(neib), ierr )
     enddo

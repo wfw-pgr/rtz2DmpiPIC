@@ -34,8 +34,10 @@ module constants
   ! --- [3] Equilibrium Settings      --- !
   ! ------------------------------------- !
   !  -- [3-1] Simulation Box size     --  !
-  integer         , parameter :: N1             =    512
-  integer         , parameter :: N2             =    256
+  integer         , parameter :: N1             =    256
+  integer         , parameter :: N2             =    128
+  ! integer         , parameter :: N1             =    512
+  ! integer         , parameter :: N2             =    256
   double precision            :: x1Min          =   -20.0d0
   double precision            :: x1Max          =   +20.0d0
   double precision            :: x2Min          =   + 0.0d0

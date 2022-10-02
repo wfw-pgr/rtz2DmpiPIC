@@ -1,0 +1,61 @@
+&equSettings
+    boundaryType             = "pcw"
+    caseIOType               = "caseO"
+    coordinateType           = "RZ"
+    equiliType               = "FRC"
+    gridType                 = "staggardB"
+    job                      = "test01"
+    normalizationInGS        = "MHD"
+    normalizationType        = "MHD"
+    normalizeField           = True
+    parityType               = "counter"
+    solverType               = "BiCGSTAB"
+/   ! -- End of equSettings
+
+&grid
+    LI                       = 512
+    LJ                       = 256
+    Lmid                     = 50
+    rMax_mhd                 =  2.00000000e+00
+    rMin_mhd                 =  0.00000000e+00
+    zMax_mhd                 =  2.00000000e+00
+    zMin_mhd                 = -2.00000000e+00
+/   ! -- End of grid
+
+&pic
+    TiTe                     =  1.00000000e+00
+    dr_Debye                 =  1.20000000e+00
+    dz_Debye                 =  1.20000000e+00
+    mr                       =  5.00000000e+01
+    vthcv                    =  8.00000000e-02
+    wpewce                   =  5.00000000e+00
+/   ! -- End of pic
+
+&equ
+    Bmax                     =  1.00000000e+00
+    Bsensor_r1               =  3.50000000e-01
+    Bsensor_r2               =  6.50000000e-01
+    Djh                      =  2.00000000e-01
+    Picard_alphaB            =  5.00000000e-01
+    alpha                    =  2.00000000e+00
+    alpha_star               =  4.00000000e-01
+    aspectRatio              =  0.00000000e+00
+    beta_pol                 =  1.00000000e+00
+    beta_sep                 =  2.00000000e-01
+    beta_tor                 =  0.00000000e+00
+    c1                       =  8.00000000e-01
+    c2                       =  2.00000000e-01
+    convergence1             =  1.00000000e-04
+    convergence2             =  1.00000000e-04
+    epsilon                  =  2.00000000e+00
+    eta                      =  1.50000000e-01
+    iterMax1                 = 3
+    iterMax2                 = 3
+    lambda                   =  1.20000000e+00
+    limiter_rPos             = 0.8,0.2
+    limiter_zPos             = 0.5,0.5
+    pTop                     =  1.00000000e-02
+    psisw                    = 3
+    rhoFloor                 =  1.00000000e-01
+/   ! -- End of equ
+

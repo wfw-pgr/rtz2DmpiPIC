@@ -3,13 +3,13 @@ contains
 
   subroutine SolveGS
 
-    use constants  , only : Nr, Nz, itermax1, itermax2, rmin, solver, jobdir, myRank, PEtot
-    use constants  , only : convergence1, convergence2
-    use variables  , only : psi, r, z, rhs, dr, dz
-    use bdrc       , only : updateBC
-    use sorsolver  , only : solv_poisson
-    use myPBiCGSTAB, only : BiCGSTABCyl2D_MPI
-    use myutil     , only : TimeMeasure
+    use constants   , only : Nr, Nz, itermax1, itermax2, rmin, solver, jobdir, myRank, PEtot
+    use constants   , only : convergence1, convergence2
+    use variables   , only : psi, r, z, rhs, dr, dz
+    use bdrc        , only : updateBC
+    use sorsolver   , only : solv_poisson
+    use myPBiCGSTAB , only : BiCGSTABCyl2D_MPI
+    use utilitiesMod, only : TimeMeasure_MPI
     implicit none
     integer              :: iter1, iter2, cnv_flag1, cnv_flag2
     double precision     :: diff1, diff2
@@ -41,20 +41,20 @@ contains
              write(6,'(3x,2(a,i8))') 'Iteration1     == ', iter1, '       of Iteration2   == ', iter2
              write(6,*) '--------------------------------------------------------------------'
           endif
-          call TimeMeasure(3)
+          call TimeMeasure_MPI(3)
           if ( solver.eq.'SOR' ) call solv_poisson
           ! if ( solver.eq.'BCG' ) call BiCGSTABCyl2D( psi, rhs, dz, dr, Nz, Nr, rmin )
           if ( solver.eq.'BCG' ) call BiCGSTABCyl2D_MPI( psi, rhs, dz, dr, Nz, Nr, rmin )
-          call TimeMeasure(2)
+          call TimeMeasure_MPI(2)
 
           call DeterminePsi
           if ( ( iter1.ne.0 ).or.( iter2.ne.0 ) ) call PicardIteration
           call checkConvg( 1, iter1, cnv_flag1, convergence1, diff1 )
-          call TimeMeasure(3)
+          call TimeMeasure_MPI(3)
           call UpdateJphi
-          call TimeMeasure(4)
+          call TimeMeasure_MPI(4)
           call WriteLog( iter1, iter2, diff1, diff2 )
-          call TimeMeasure(3)
+          call TimeMeasure_MPI(3)
 
        enddo
 
@@ -69,7 +69,7 @@ contains
           write(6,*) ' ======================================================================= '
           write(6,*)
        endif
-       call TimeMeasure(3)
+       call TimeMeasure_MPI(3)
 
     enddo
 

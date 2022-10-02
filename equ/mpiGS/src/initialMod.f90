@@ -27,7 +27,6 @@ contains
 
   
   subroutine InitVariables
-
     use constants, only : Nr, Nz, Nmid, myRank, normType
     use constants, only : vthcv, wpewce, dr_Debye, dz_Debye
     use constants, only : rMax, rMin, zMax, zMin, Bv0, AspectR

@@ -276,48 +276,68 @@ contains
     return
   end subroutine FindExtremum2D_ZigZag
   
-  
+
+  ! ====================================================== !
+  ! === cubic spline 1D                                === !
+  ! ====================================================== !
   subroutine cSpline1D( x, y, M , xnew, ynew, ynewprime)
-    
     implicit none
     integer         , intent(in)    :: M
     double precision, intent(in)    :: x(M), y(M), xnew ! [caution] x(N+1) !!!!
     double precision, intent(inout) :: ynew, ynewprime
     integer                         :: i, j, sizexnew
-    double precision                :: h(M-1), hinv(M-1), v(2:M-1), u(M)
+    double precision                :: h(M-1), hInv(M-1), v(2:M-1), u(M)
     double precision                :: mat(2:M-1,M)
     double precision                :: a(M-1), b(M-1), c(M-1), d(M-1)
 
-    !  --- [1] Calculate h(j) and v(j) to solve u(j) --- !
+    ! ------------------------------------------------------ !
+    ! --- [1] prepare :: h(j) : dx(j)                    --- !
+    ! ------------------------------------------------------ !
     do j=1, M-1
        h(j)    = x(j+1) - x(j)
-       hinv(j) = 1.d0 / h(j)
+       if ( h(j) == 0.d0 ) then
+          write(6,*) "[cSpline1D @ NewtonRaphson.f90] x-vector is not Monotonic... [ERROR] "
+          do i=1, M
+             write(6,*) i, j, x(i), y(i)
+          enddo
+          stop
+       else
+          hInv(j) = 1.d0 / h(j)
+       endif
     enddo
+    ! ------------------------------------------------------ !
+    ! --- [2] prepare :: v(j) : derivative = dy/dx       --- !
+    ! ------------------------------------------------------ !
     do j=2, M-1
-       v(j) = 6.0d0*( ( y(j+1)-y(j  ) )*hinv(j) - &
-            &         ( y(j  )-y(j-1) )*hinv(j-1) )
+       v(j) = 6.0d0*( ( y(j+1)-y(j  ) )*hInv(j  ) - &
+            &         ( y(j  )-y(j-1) )*hInv(j-1)   )
     enddo
-
-    !  --- [2] Initialize u(j)          --- !
+    ! ------------------------------------------------------ !
+    ! --- [3] prepare :: u(j) : d2y / dx2 = f''          --- !
+    ! ------------------------------------------------------ !
     u(:) = 0.0d0
     !    -- [2-1] B.C. Disignation ( f''= 0 (natural spline) ) -- !
     u(1) = 0.0d0
     u(M) = 0.0d0
 
-    !  --- [3] Solve equations for u(j) --- !
-    !    -- [3-1] Preparation :: Make Matrix -- !
+    ! ------------------------------------------------------ !
+    ! --- [4] Solve equations for u(j)                   --- !
+    ! ------------------------------------------------------ !
+    !  -- [4-1] Preparation :: Make Matrix               --  !
     mat(:,:) = 0.0d0
     do i=2, M-1
        mat(i,i-1) = h(i-1)
        mat(i,i)   = 2.0d0 * ( h(i-1)+h(i) )
        mat(i,i+1) = h(i)
     enddo
-    !    -- [3-2] Solve --  !
+    !  -- [4-2] Solve Equation                           --  !
     call TriDiag( M-1, u, h, mat )
-    !    -- [3-3] Obtain Coefficients --  !
+    !  -- [4-3] Obtain Coefficients                      --  !
     call GetCoef( u, x, y, a, b, c, d)
     
-    !  --- [4] Interpolation  --- !
+    ! ------------------------------------------------------ !
+    ! --- [5] Interpolation using coefficients           --- !
+    ! ------------------------------------------------------ !
     ynew      = SplInterp_Value( x, y, xnew, a, b, c, d )
     ynewprime = SplInterp_Deriv( x,    xnew, a, b, c, d )
 
@@ -325,8 +345,10 @@ contains
   end subroutine cSpline1D
 
 
+  ! ====================================================== !
+  ! === cubic-spline 2D ( for grided 2D Data:fxy )     === !
+  ! ====================================================== !
   subroutine cSpline2D( x, y, fxy, xk, yk, fk, dfdx, dfdy )
-    
     implicit none
     double precision, intent(in)  :: xk, yk
     double precision, intent(in)  :: x(:), y(:), fxy(:,:)
@@ -336,12 +358,16 @@ contains
     double precision              :: xtoy, ytox
     double precision, allocatable :: xinterpd(:), yinterpd(:)
 
-    !  --- [0] Preparation --- !
+    ! ------------------------------------------------------ !
+    ! --- [1] Preparation                                --- !
+    ! ------------------------------------------------------ !
     Nx = size( x )
     Ny = size( y )
     allocate( xinterpd(Ny), yinterpd(Nx) )
 
-    !  --- [1] Calculate df/dy at xk, yk --- !
+    ! ------------------------------------------------------ !
+    ! --- [2] calculate df/dy at (xk,yk)                 --- !
+    ! ------------------------------------------------------ !
     do j=1, Ny
        call cSpline1D( x, fxy(:,j), Nx, xk, fnew, fnewprime )
        xinterpd(j) = fnew
@@ -350,7 +376,9 @@ contains
     xtoy = fnew
     dfdy = fnewprime
 
-    !  --- [2] Calculate df/dx at xk, yk --- !
+    ! ------------------------------------------------------ !
+    ! --- [3] calculate df/dx at  (xk,yk)                --- !
+    ! ------------------------------------------------------ !
     do i=1, Nx
        call cSpline1D( y, fxy(i,:), Ny, yk, fnew, fnewprime )
        yinterpd(i) = fnew
@@ -359,7 +387,11 @@ contains
     ytox = fnew
     dfdx = fnewprime
 
+    ! ------------------------------------------------------ !
+    ! --- [4] choose whether xtoy / ytox                 --- !
+    ! ------------------------------------------------------ !
     fk   = xtoy
+    ! fk   = ytox
 
     return
   end subroutine cSpline2D

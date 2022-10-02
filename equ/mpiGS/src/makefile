@@ -1,27 +1,45 @@
 target = ../main
 object = \
-  variables.o \
-  myutil.o \
-  myPBiCGSTAB_MPI.o \
+  variablesMod.o \
+  utilitiesMod.o \
+  cubSplineMod.o \
+  saveFieldMod.o \
+  psiGSFuncMod.o \
+  PBiCGStabMod.o \
+  allocatorMod.o \
+  parameterMod.o \
+  diagnosisMod.o \
+  currentFnMod.o \
+  boundaryCMod.o \
   NewtonRaphson.o \
-  sorsolver.o \
-  bdrc.o \
-  psifunc.o \
-  gs_solver.o \
-  Field.o \
-  RgridMod.o \
-  BgridMod.o \
-  diagnosis.o \
-  equset.o \
-  writingMod.o \
-  initialMod.o \
+  solveGSEqMod.o \
+  initiatorMod.o \
   main.o
 
+  # myPBiCGSTAB_MPI.o \
+  # NewtonRaphson.o \
+  # sorsolver.o \
+  # bdrc.o \
+  # psifunc.o \
+  # gs_solver.o \
+  # Field.o \
+  # RgridMod.o \
+  # BgridMod.o \
+  # diagnosis.o \
+  # equset.o \
+  # writingMod.o \
+  # initiatorMod.o \
+
+
+# -- obsoletes -- #
 # trisolver.o \
 # spline_interp.o \
 # NR_extremum.o \
-
+# myutil.o \
+# initialMod.o \
+# variables.o \
 # FC = gfortran
+# -- obsoletes -- #
 
 FFLAGS  =
 LDFLAGS =
@@ -62,6 +80,7 @@ ifeq (${shell uname},Darwin)
   # LDFLAGS += -qopenmp
   # FFLAGS  += -Wl,-stack_size,0x40000000
 endif
+
 # ---  Debug  Options  --- #
 # FFLAGS = -fbacktrace -ffpe-trap=invalid,zero,overflow
 # FFLAGS = -g -traceback -CB

@@ -69,38 +69,38 @@ PS:=${words ${filter fes%,${HOST}} }
 # ---    ReedBush-U    --- #
 ifeq (${RB},1)
   FC       = mpiifort
-  FFLAGS  += -xHOST -O3 -no-prec-div -ipo
-  LDFLAGS += -qopenmp
+  FFLAGS  += -xHOST -O3 -no-prec-div -ipo -qopenmp
+  LDFLAGS +=
 endif
 # --- Plasma Simulator --- #
 ifeq (${PS},1)
   FC       = mpifrtpx
-  FFLAGS  += -Kfast
-  LDFLAGS += -Kopenmp
+  FFLAGS  += -Kfast -Kopenmp
+  LDFLAGS +=
 endif
 # ---      gauss       --- #
 ifeq (${shell hostname},gauss)
   FC       = mpif90
-  FFLAGS  += -O3
-  LDFLAGS += -fopenmp
+  FFLAGS  += -O3 -fopenmp
+  LDFLAGS +=
 endif
 # ---      evans       --- #
 ifeq (${shell hostname},evans)
   FC       = mpifort
-  FFLAGS  += -xHOST -O3 -no-prec-div -ipo
-  LDFLAGS += -openmp
+  FFLAGS  += -xHOST -O3 -no-prec-div -ipo -openmp
+  LDFLAGS +=
 endif
 # ---  FrenchQuarter   --- #
 ifeq (${shell hostname},FrenchQuarter)
   FC       = mpifort
-  FFLAGS  += -xHOST -O3 -no-prec-div -ipo
-  LDFLAGS += -openmp
+  FFLAGS  += -xHOST -O3 -no-prec-div -ipo -openmp
+  LDFLAGS +=
 endif
 # ---    kolmogorov    --- #
 ifeq (${shell hostname},kolmogorov)
   FC       = mpiifort
-  FFLAGS  += -xHOST -O3 -no-prec-div -ipo
-  LDFLAGS += -qopenmp
+  FFLAGS  += -xHOST -O3 -no-prec-div -ipo -qopenmp
+  LDFLAGS += 
 endif
 # ---      euler       --- #
 ifeq (${shell hostname},euler.local)
@@ -111,9 +111,17 @@ ifeq (${shell hostname},euler.local)
 endif
 ifeq (${shell hostname},maxwell.local)
   FC       =mpif90
-  FFLAGS  +=-O3 -fopenmp -fallow-argument-mismatch -fno-range-check
+#  FFLAGS  +=-O3 -fopenmp -fallow-argument-mismatch -fno-range-check
+  FFLAGS  +=-O3 -fopenmp -fallow-argument-mismatch
   LDFLAGS +=
 endif
+ifeq (${shell hostname},maxwell.lan)
+  FC       =mpif90
+#  FFLAGS  +=-O3 -fopenmp -fallow-argument-mismatch -fno-range-check
+  FFLAGS  +=-O3 -fopenmp -fallow-argument-mismatch
+  LDFLAGS +=
+endif
+
 # ---  Debug  Options  --- #
 # FFLAGS += -g
 # FFLAGS   += -fbounds-check -fbacktrace -ffpe-trap=invalid,zero,overflow

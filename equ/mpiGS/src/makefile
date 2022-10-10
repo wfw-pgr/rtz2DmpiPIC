@@ -11,7 +11,7 @@ object = \
   diagnosisMod.o \
   currentFnMod.o \
   boundaryCMod.o \
-  NewtonRaphson.o \
+  newtonRapMod.o \
   solveGSEqMod.o \
   initiatorMod.o \
   main.o

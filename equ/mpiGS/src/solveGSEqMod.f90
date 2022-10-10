@@ -1,6 +1,7 @@
 module solveGSEqMod
   implicit none
-  character(2), parameter :: jdg = '1D'
+  character(2)    , parameter :: jdg = '1D'
+  double precision, parameter :: convergence_factor = 1.e-8
 contains
 
   ! ====================================================== !
@@ -8,10 +9,11 @@ contains
   ! ====================================================== !
   subroutine determine__psiPotential
     use variablesMod
-    use NewtonRaphson, only  : FindExtremum2D, cSplineNewtonRaphson1D, cSpline1D, cSpline2D
+    use cubSplineMod, only : interpolate__cubicSpline1D_point, interpolate__cubicSpline2D_point
+    use newtonRapMod, only : solve__cSpline_NewtonRaphson1D, solve__cSpline_NewtonRaphson2D
     implicit none
     integer                 :: i, j, flag
-    double precision        :: probe, det, psizz, dpsidr, dpsidz
+    double precision        :: probe, dpsidr, dpsidz
     double precision        :: dpdr(LJ-1), rAxis_h(LJ-1), rSep(2)
     
     ! ------------------------------------------------------ !
@@ -22,7 +24,7 @@ contains
        do j=1, LJ
           psiMin = min( psiMin, psi(2,j) )
        enddo
-       call cSpline1D( rAxis, psi(2,:), LJ, limiter_rPos(1), psiLim, dpsidr )
+       call interpolate__cubicSpline1D_point( rAxis, psi(2,:), limiter_rPos(1), psiLim, dpsidr )
     endif
     
     ! ------------------------------------------------------ !
@@ -33,8 +35,9 @@ contains
        ! --- [2-1] 2D routines ( unstable ? )               --- !
        ! ------------------------------------------------------ !
        if ( jdg.eq."2D" ) then
-          call FindExtremum2D( zAxis, rAxis, psi, magAxis(z_), magAxis(r_), &
-               &               psiMin,  det, psizz, flag )
+          call solve__cSpline_NewtonRaphson2D( zAxis, rAxis, psi, &
+               &                               magAxis(z_), magAxis(r_), psiMin,  &
+               &                               flag, "max", convergence_factor )
        endif
        ! ------------------------------------------------------ !
        ! --- [2-2] 1D routines ( relatively stable ? )      --- !
@@ -49,11 +52,11 @@ contains
           enddo
           !$omp end do
           !$omp end parallel
-          call cSplineNewtonRaphson1D( rAxis_h, dpdr, magAxis(r_), psiMin, flag  )
-          call cSpline1D( rAxis, psi(LI/2,:), LJ, magAxis(r_), psiMin, dpsidr )
+          call solve__cSpline_NewtonRaphson1D( rAxis_h, dpdr, magAxis(r_), psiMin, &
+               &                               flag, "max", convergence_factor )
+          call interpolate__cubicSpline1D_point( rAxis, psi(LI/2,:), magAxis(r_), &
+               &                                 psiMin, dpsidr )
           magAxis(z_) = 0.d0
-          det         = 1.d0
-          psizz       = 1.d0
           flag        = 1
        endif
        ! ------------------------------------------------------ !
@@ -68,8 +71,6 @@ contains
              endif
           enddo
           magAxis(z_) = 0.d0
-          det         = 1.d0
-          psizz       = 1.d0
           flag        = 1
        endif
 
@@ -78,11 +79,13 @@ contains
        ! ------------------------------------------------------ !
        psiLim = - 1.d5
        do i=1, nLimiter
-          write(6,*) minval( zAxis(:) ), maxval( zAxis(:) )
-          write(6,*) minval( rAxis(:) ), maxval( rAxis(:) )
-          call cSpline2D( zAxis, rAxis, psi, limiter_zPos(i), limiter_rPos(i), &
-               &          probe, dpsidr, dpsidz )
-          write(6,*) probe, psiLim, limiter_zpos(i), limiter_rPos(i), minval( psi(:,:) ), maxval(psi(:,:) )
+          ! write(6,*) minval( zAxis(:) ), maxval( zAxis(:) )
+          ! write(6,*) minval( rAxis(:) ), maxval( rAxis(:) )
+          call interpolate__cubicSpline2D_point( zAxis, rAxis, psi, &
+               &                                 limiter_zPos(i), limiter_rPos(i), &
+               &                                 probe, dpsidr, dpsidz )
+          ! write(6,*) probe, psiLim, limiter_zpos(i), limiter_rPos(i), &
+          !      &     minval( psi(:,:) ), maxval(psi(:,:) )
           if ( probe > psiLim ) then
              psiLim        = probe
              limiter_index = i
@@ -118,14 +121,14 @@ contains
        write(6,'(4x,a)') '[ Determine Psi     ]'
        if ( psiMin.ne.psiMin ) stop '[ERROR] NaN value -- psiMin [ERROR]'
 
-       if (  flag.eq.0 ) then
+       if (  flag.eq.-1 ) then
           write(6,'( 8x,a)') '====================================================='
           write(6,'(10x,a)') '[CAUTION]   psiMin did not converged   [CAUTION] '
           write(6,'( 8x,a)') '====================================================='
        else
-          if ( ( det.gt.0.d0 ).and.( psizz.gt.0.0d0 ) ) write(6,'(8x,a)') 'Converged ---  Extremum minimum value'
-          if ( ( det.gt.0.d0 ).and.( psizz.le.0.0d0 ) ) write(6,'(8x,a)') 'Converged ---  Extremum maximum value'
-          if (   det.lt.0.d0                          ) write(6,'(8x,a)') 'Converged ---  Saddle Point'
+          if ( flag.eq.0 ) write(6,'(8x,a)') 'Converged ---  Saddle Point'
+          if ( flag.eq.1 ) write(6,'(8x,a)') 'Converged ---  Extremum minimum value'
+          if ( flag.eq.2 ) write(6,'(8x,a)') 'Converged ---  Extremum maximum value'
        endif
        write(6,'(8x,a,2(f8.4,a),e12.5)') &
             & 'Mag Axis   = ( ', magAxis(r_), ',', magAxis(z_), ')  -- psiMin = ', psiMin

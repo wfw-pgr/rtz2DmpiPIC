@@ -11,9 +11,14 @@ module variablesMod
   integer         , parameter   :: cLen          = 300
   integer         , parameter   :: lun           = 50
   integer         , parameter   :: PEtot         = 2
-  character(cLen) , parameter   :: parameterFile = "dat/mpiGS.lst"
   double precision, parameter   :: pi = 4.d0 * atan( 1.d0 )
 
+  ! ------------------------------------------------------ !
+  ! --- [2] I/O Files                                  --- !
+  ! ------------------------------------------------------ !
+  character(cLen) , parameter   :: parameterFile   = "dat/mpiGS.lst"
+  character(cLen) , parameter   :: convergenceFile = "dat/convergence.log"
+  
   ! ------------------------------------------------------ !
   ! --- [2] abbreviations                              --- !
   ! ------------------------------------------------------ !
@@ -64,6 +69,7 @@ module variablesMod
 
   integer         , parameter   :: nLimiter_max  = 5
   double precision              :: limiter_zPos(nLimiter_max), limiter_rPos(nLimiter_max)
+  double precision              :: limiter_psi (3,nLimiter_max)
 
   ! ====================================================== !
   ! ===  variables                                     === !

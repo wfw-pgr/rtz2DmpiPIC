@@ -9,6 +9,8 @@ program main
   use variablesMod
   use utilitiesMod, only : TimeMeasure_MPI, show__programLogo_MPI, show__endLogo_MPI
   use initiatorMod, only : initialize__mpiGS
+  use solveGSEqMod, only : solve__GradShafranov
+  
   ! use initialMod  , only : InitCond
   ! use gs_solver   , only : SolveGS
   ! use Field       , only : calc_Bfield_Egrid, calc_Bfield_Bgrid
@@ -28,7 +30,6 @@ program main
   !  -- [2-1] MPI settings                             --  !
   call MPI_Init     ( ierr )
   call MPI_Comm_Rank( MPI_COMM_WORLD, myRank, ierr )
-  ! call MPI_Comm_Size( MPI_COMM_WORLD, PEtot , ierr )
   call MPI_Comm_Size( MPI_COMM_WORLD, PEtoth, ierr )
   if ( PEtot.ne.PEtoth ) then
      write(6,*) '[ERROR] PEtot is incompatible ', PEtot, &
@@ -48,7 +49,7 @@ program main
   ! ------------------------------------------------------ !
   ! --- [4] Grad-Shafranov Eq. Solving                 --- !
   ! ------------------------------------------------------ !
-  ! call SolveGS
+  call solve__GradShafranov
   call TimeMeasure_MPI( 3 )
 
   ! ------------------------------------------------------ !
